@@ -33,7 +33,7 @@ var history	= "/mijn-ovreishistorie/mijn-ovreishistorie.htm";
  * Open login page and login 
  */
 casper.start(base.concat(login), function() {
-  _showTitlePicture(casper, '1_login.png');
+  _logStatus(casper, '1_login.png');
 
   if (this.exists('#username') && this.exists('#password')) {
     this.fill('form#login-form', {
@@ -41,7 +41,6 @@ casper.start(base.concat(login), function() {
       'password': _password
     }, true);
   }
-
 });
 
 /* 
@@ -51,9 +50,16 @@ casper.waitFor(function check() {
   return (this.getCurrentUrl() === base.concat(userpage, '.htm'));
 },
   function then() {
-    _showTitlePicture(casper, '2_userpage.png');
+    _logStatus(casper, '2_userpage.png');
   }
 );
+
+/* 
+ * Open OV travel history page
+ */
+casper.thenOpen(base.concat(userpage, history, _transactionUrl()), function() {
+  _logStatus(casper, '3_history.png');
+});
 
 /* 
  * Run casper
@@ -62,12 +68,50 @@ casper.run();
 
 
 /* 
+ * Custom funcions:
+ * _logStatus - Echo current title and take screenshot.
+ * _transactionUrl - Create part of URL to get transaction within a daterange
+ * _formatDate - Format dates to correspond with the URL requirements
+ */
+
+/* 
  * Login with username and password
  */
-var _showTitlePicture = function (casper, pictureName)
+function _logStatus (casper, pictureName)
 {
   casper.echo(casper.getTitle());
   casper.capture(pictureName);
 }
+
+/* 
+ * Create URL to dispaly all transactions from a specific period of time
+ */
+function _transactionUrl () 
+{
+  // Declare first and last day of the month
+  var date      = new Date();
+  var firstDay  = new Date(date.getFullYear(), date.getMonth(), 1);
+  // var lastDay  = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  var dateUrl = '&begindate=' + _formatDate(firstDay) + '&enddate=' + _formatDate(date);
+
+  return '?mediumid=' + dateUrl + '&type=#transactions';
+
+}
+
+/* 
+ * Format the dates to correspond with the URL requirements
+ */
+function _formatDate (dateTime) 
+{
+  var day   = dateTime.getDate();
+  var month   = dateTime.getMonth() + 1; // months start from 0, i.e. January = 0.
+  var year  = dateTime.getFullYear();
+
+  //Give days proper format: '09' instead of '9'
+  day = day < 10 ? '0' + day : day;
+
+  return day + '-' + month + '-' + year; 
+}
+
 
 

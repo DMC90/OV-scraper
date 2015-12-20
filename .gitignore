@@ -1,3 +1,8 @@
 #Config files
 config.js
 
+#All .png files (pictures) in project
+*.png
+
+#.DS_store fil
+.DS_Store
